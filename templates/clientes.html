@@ -1,0 +1,20 @@
+<div class="table-responsive">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre Cliente</th>
+                <th>Número</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for renglon in clientes %}
+            <tr>
+                <td>{{ $renglon.idCliente }}</td>
+                <td>{{ $renglon.nombreCliente }}</td>
+                <td>{{ $renglon.numero }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
