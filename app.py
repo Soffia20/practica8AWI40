@@ -17,11 +17,12 @@ import pytz
 
 from flask_cors import CORS, cross_origin
 
+# CAMBIAR CONEXION A BD
 con = mysql.connector.connect(
     host="185.232.14.52",
-    database="u760464709_16005339_bd",
-    user="u760464709_16005339_usr",
-    password="/iJRzrJBz+P1"
+    database="u760464709_23005355_bd",
+    user="u760464709_23005355_usr",
+    password="ocK!n2:8Oy"
 )
 
 app = Flask(__name__)
@@ -45,19 +46,18 @@ def app2():
 
     return "<h5>Hola, soy la view app</h5>"
 
-@app.route("/productos")
-def productos():
+@app.route("/clientes")
+def clientes():
     if not con.is_connected():
         con.reconnect()
 
     cursor = con.cursor(dictionary=True)
     sql    = """
-    SELECT Id_Producto,
-           Nombre_Producto,
-           Precio,
-           Existencias
+    SELECT idCliente,
+           nombreCliente,
+           numero
 
-    FROM productos
+    FROM clientes
 
     LIMIT 10 OFFSET 0
     """
@@ -75,10 +75,10 @@ def productos():
         registro["Hora"]       = fecha_hora.strftime("%H:%M:%S")
     """
 
-    return render_template("productos.html", productos=registros)
+    return render_template("clientes.html", clientes=registros)
 
-@app.route("/productos/buscar", methods=["GET"])
-def buscarProductos():
+@app.route("/clientes/buscar", methods=["GET"])
+def buscarClientes():
     if not con.is_connected():
         con.reconnect()
 
@@ -88,18 +88,16 @@ def buscarProductos():
     
     cursor = con.cursor(dictionary=True)
     sql    = """
-    SELECT Id_Producto,
-           Nombre_Producto,
-           Precio,
-           Existencias
+    SELECT idCliente,
+           nombreCliente,
+           numero
 
-    FROM productos
+    FROM clientes
 
-    WHERE Nombre_Producto LIKE %s
-    OR    Precio          LIKE %s
-    OR    Existencias     LIKE %s
+    WHERE nombreCliente LIKE %s
+    OR    numero          LIKE %s
 
-    ORDER BY Id_Producto DESC
+    ORDER BY idCliente DESC
 
     LIMIT 10 OFFSET 0
     """
@@ -128,38 +126,36 @@ def buscarProductos():
 
     return make_response(jsonify(registros))
 
-@app.route("/producto", methods=["POST"])
+@app.route("/clientes", methods=["POST"])
 # Usar cuando solo se quiera usar CORS en rutas específicas
 # @cross_origin()
-def guardarProducto():
+def guardarClientes():
     if not con.is_connected():
         con.reconnect()
 
     id          = request.form["id"]
     nombre      = request.form["nombre"]
-    precio      = request.form["precio"]
-    existencias = request.form["existencias"]
+    numero      = request.form["numero"]
     # fechahora   = datetime.datetime.now(pytz.timezone("America/Matamoros"))
     
     cursor = con.cursor()
 
     if id:
         sql = """
-        UPDATE productos
+        UPDATE clientes
 
-        SET Nombre_Producto = %s,
-            Precio          = %s,
-            Existencias     = %s
+        SET nombreCliente = %s,
+            numero          = %s
 
-        WHERE Id_Producto = %s
+        WHERE idCliente = %s
         """
-        val = (nombre, precio, existencias, id)
+        val = (nombre, numero, id)
     else:
         sql = """
-        INSERT INTO productos (Nombre_Producto, Precio, Existencias)
+        INSERT INTO clientes (nombreCliente, numero)
                     VALUES    (%s,          %s,      %s)
         """
-        val =                 (nombre, precio, existencias)
+        val =                 (nombre, numero,)
     
     cursor.execute(sql, val)
     con.commit()
@@ -167,18 +163,18 @@ def guardarProducto():
 
     return make_response(jsonify({}))
 
-@app.route("/producto/<int:id>")
-def editarProducto(id):
+@app.route("/clientes/<int:id>")
+def editarClientes(id):
     if not con.is_connected():
         con.reconnect()
 
     cursor = con.cursor(dictionary=True)
     sql    = """
-    SELECT Id_Producto, Nombre_Producto, Precio, Existencias
+    SELECT idCliente, nombreCliente, numero
 
-    FROM productos
+    FROM clientes
 
-    WHERE Id_Producto = %s
+    WHERE idCliente = %s
     """
     val    = (id,)
 
@@ -188,8 +184,8 @@ def editarProducto(id):
 
     return make_response(jsonify(registros))
 
-@app.route("/producto/eliminar", methods=["POST"])
-def eliminarProducto():
+@app.route("/clientes/eliminar", methods=["POST"])
+def eliminarClientes():
     if not con.is_connected():
         con.reconnect()
 
@@ -197,8 +193,8 @@ def eliminarProducto():
 
     cursor = con.cursor(dictionary=True)
     sql    = """
-    DELETE FROM productos
-    WHERE Id_Producto = %s
+    DELETE FROM clientes
+    WHERE idCliente = %s
     """
     val    = (id,)
 
